@@ -1,0 +1,88 @@
+@startuml
+title School Facility Rental - Activity
+
+|Renter|
+start
+:Choose facility, date, time and event type;
+
+|Website|
+repeat
+    :Check availability;
+
+    if (available?) then (yes)
+        :Create request;
+        break
+    else (no)
+        :Show not available;
+
+        |Renter|
+        if (Try another date?) then (yes)
+            :Choose another date;
+        else (no)
+            stop
+        endif
+    endif
+
+|Website|
+    repeat while (Check again?) is (yes)
+
+|Renter|
+    :Enter contact information;
+    :Submit rental request;
+
+|Website|
+    :Receive rental request;
+    fork
+        :Records rental request;
+    fork again
+        :Send request to School Staff;
+    end fork
+
+|School Staff|
+    :Review rental request;
+    if (Request is approved?) then (approved)
+        |Website|
+            :Receive approval;
+            fork
+                :Records approval;
+            fork again
+                :Request Payment;
+            end fork
+        |Renter|
+            :Enter payment information;
+        |Website|
+            :Send payment information;
+        |Payment Service|
+            :Receives payment information;
+            :Process payment;
+        |Website|
+            :Receive payment result;
+            if (Payment successful?) then (Payment succeeds)
+                |Website|
+                    :Save booking;
+                |Email Service|
+                    :Sends rental confirmation;
+                |Renter|
+                    :Receives rental confirmation;
+                    stop
+            else (Payment fails)
+                |Website|
+                    :Record failed payment;
+                |Email Service|
+                    :Sends payment failure email;
+                |Renter|
+                    :Receive payment failure email;
+                    stop
+
+            end if
+    else (rejected)
+        |Website|
+            :Receive rejection;
+            :Record rejection;
+        |Email Service|
+            :Send rejection email;
+        |Renter|
+            :Receive rejection mail;
+            stop
+    end if
+    @enduml
